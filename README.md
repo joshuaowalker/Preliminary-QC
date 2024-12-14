@@ -1,4 +1,4 @@
-# Reverse Complement and Quality Control Script
+# Preliminary Consensus Sequence QC - FASTQ
 
 This Python script processes a FASTQ file by performing reverse complement correction, detecting outliers, and removing low-quality reads based on alignment scores. The final output includes a corrected FASTQ file with comprehensive quality control applied.
 
