@@ -1,32 +1,38 @@
 # Preliminary Consensus Sequence QC - FASTQ
 
-This Python script processes a FASTQ file by performing reverse complement correction, detecting outliers, and removing low-quality reads based on alignment scores. The final output includes a corrected FASTQ file with comprehensive quality control applied.
+This Python script processes a FASTQ file to:
+1. Detect and remove outliers based on read length and alignment scores.
+2. Correct the orientation of reads using reverse complement alignment.
+3. Output a cleaned FASTQ file with comprehensive quality control applied.
+
+The script dynamically calculates thresholds for alignment-based outliers using percentile-based scoring and for length-based outliers using interquartile range (IQR).
+
+---
 
 ## Features
 
-1. **Consensus Sequence Generation**  
-   Generates a consensus sequence from the input FASTQ file by taking the most common base at each position.
+### 1. Reverse Complement Correction
+- Aligns each read to the consensus sequence.
+- Corrects the orientation of reads by applying reverse complement if the reverse alignment score is better.
 
-2. **Outlier Detection**  
-   Detects and removes:
-   - **Length-based outliers**: Reads that are unusually short or long based on interquartile range (IQR) thresholds.
-   - **Alignment-based outliers**: Reads with alignment scores below a threshold (default: 20).
 
-3. **Reverse Complement Correction**  
-   Aligns each read to the consensus sequence and applies reverse complement if the reverse alignment score is better.
+### 2. Outlier Detection
+- **Length-Based Outliers**:
+  - Detects unusually short or long reads based on IQR thresholds.
+  - Automatically removes these reads from the dataset.
+- **Alignment-Based Outliers**:
+  - Calculates dynamic thresholds based on the bottom 10% of alignment scores.
+  - Flags and removes reads with alignment scores below this threshold.
 
-4. **Worst 10% Removal**  
-   Removes the bottom 10% of aligning reads based on alignment scores, but only if the input file contains 5 or more reads.
+### 3. Comprehensive Reporting
+- Provides detailed on-screen output for:
+  - Total initial reads.
+  - Length-based and alignment-based outliers removed.
+  - Total reverse complement corrections applied.
+  - Final number of reads after QC.
 
-5. **Comprehensive Reporting**  
-   Provides detailed on-screen output, including:
-   - Total initial reads.
-   - Number of length-based and alignment-based outliers removed.
-   - Number of worst-aligning reads removed.
-   - Total reads remaining after QC.
-
-6. **Dynamic Output Filenames**  
-   Corrected FASTQ file names include the total number of reads remaining after QC (e.g., `Corrected_InputFileName-XXseqs.fastq`).
+### 4. Dynamic Output Filenames
+- The corrected FASTQ file includes the total number of reads remaining in the filename (e.g., `Corrected_InputFileName-XXseqs.fastq`).
 
 ---
 
@@ -35,8 +41,9 @@ This Python script processes a FASTQ file by performing reverse complement corre
 ### Prerequisites
 
 - Python 3.6 or higher
-- Biopython library (`pip install biopython`)
-- NumPy library (`pip install numpy`)
+- Required Python libraries:
+  - **Biopython**: Install using `pip install biopython`
+  - **NumPy**: Install using `pip install numpy`
 
 ### How to Run
 
