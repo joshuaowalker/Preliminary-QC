@@ -23,6 +23,7 @@ The script dynamically calculates thresholds for alignment-based outliers using 
 - **Alignment-Based Outliers**:
   - Calculates dynamic thresholds based on the bottom 10% of alignment scores.
   - Flags and removes reads with alignment scores below this threshold.
+  - Does not implement additional filtering at this step if there are fewer than 5 reads.
 
 ### 3. Comprehensive Reporting
 - Provides detailed on-screen output for:
