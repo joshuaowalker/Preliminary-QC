@@ -1,5 +1,7 @@
 # Preliminary Consensus Sequence QC - FASTQ
 
+## Under Development
+
 This Python script processes a FASTQ file to:
 1. Correct the orientation of reads using reverse complement alignment.
 2. Detect and remove outliers based on read length and alignment scores.
