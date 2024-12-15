@@ -98,11 +98,34 @@ def main():
         # Step 1: Find and load FASTQ file
         fastq_file = find_fastq_file()
         print(f"Processing file: {fastq_file}")
-        
+
         print("Parsing FASTQ sequences...")
         sequences = list(SeqIO.parse(fastq_file, "fastq"))
 
-        # Step 2: Detect length-based outliers
+        iteration = 1
+        convergence = False
+        reverse_complemented_total = 0
+
+        while not convergence:
+            print(f"\nIteration {iteration}: Generating consensus and aligning sequences...")
+
+            # Step 2: Generate consensus sequence
+            consensus = generate_consensus(sequences)
+            print(f"Consensus sequence generated (first 50 bases): {consensus[:50]}...")
+
+            # Step 3: Reverse complement alignment
+            updated_sequences, reverse_complemented = align_and_reverse_complement(sequences, consensus)
+            reverse_complemented_total += reverse_complemented
+
+            # Check for convergence
+            if reverse_complemented == 0:
+                convergence = True
+            else:
+                sequences = updated_sequences
+
+            iteration += 1
+
+        # Step 4: Detect and remove length-based outliers
         print("Detecting length-based outliers...")
         length_outliers, lower_bound, upper_bound = detect_length_outliers(sequences)
         outliers_length_removed = len(length_outliers)
@@ -110,38 +133,28 @@ def main():
         print(f"Length-based outliers removed: {outliers_length_removed}")
         print(f"Length thresholds: lower = {lower_bound}, upper = {upper_bound}")
 
-        # Step 3: Generate consensus sequence
-        consensus = generate_consensus(sequences)
-        print(f"Consensus sequence generated (first 50 bases): {consensus[:50]}...")
-
-        # Step 4: Calculate alignment scores
-        print("Calculating alignment scores...")
+        # Step 5: Calculate alignment scores and detect alignment-based outliers
+        print("Calculating alignment scores and detecting alignment-based outliers...")
         alignment_scores = calculate_alignment_scores(sequences, consensus)
-        scores = [score for _, _, score in alignment_scores]  # Extract scores
-
-        # Step 5: Calculate dynamic threshold and detect alignment-based outliers
+        scores = [score for _, _, score in alignment_scores]
         threshold = calculate_dynamic_threshold(scores, percentile=10)
-        print(f"Dynamic alignment score threshold: {threshold:.2f}")
         alignment_outliers = detect_alignment_outliers(sequences, alignment_scores, threshold)
         outliers_alignment_removed = len(alignment_outliers)
         sequences = [seq for i, seq in enumerate(sequences) if i not in alignment_outliers]
         print(f"Alignment-based outliers removed: {outliers_alignment_removed}")
 
-        # Step 6: Reverse complement alignment
-        updated_sequences, reverse_complemented = align_and_reverse_complement(sequences, consensus)
-
-        # Step 7: Save corrected sequences
-        final_read_count = len(updated_sequences)
+        # Step 6: Save corrected sequences
+        final_read_count = len(sequences)
         corrected_file = f"Corrected_{os.path.basename(fastq_file).replace('.fastq', '')}-{final_read_count}seqs.fastq"
-        save_fastq(updated_sequences, corrected_file)
+        save_fastq(sequences, corrected_file)
 
         # Final report
         print("\nProcessing complete!")
-        print(f"Total initial sequences: {len(alignment_scores) + outliers_length_removed}")
+        print(f"Total initial sequences: {len(sequences) + outliers_length_removed + outliers_alignment_removed}")
         print(f"Total length-based outliers removed: {outliers_length_removed}")
         print(f"Total alignment-based outliers removed: {outliers_alignment_removed}")
         print(f"Total reads remaining after preliminary QC: {final_read_count}")
-        print(f"Total sequences reverse complemented: {reverse_complemented}")
+        print(f"Total sequences reverse complemented: {reverse_complemented_total}")
         print(f"Corrected sequences saved to: {corrected_file}")
 
     except Exception as e:
