@@ -1,11 +1,11 @@
 # Preliminary Consensus Sequence QC - FASTQ
 
 This Python script processes a FASTQ file to:
-1. Detect and remove outliers based on read length and alignment scores.
-2. Correct the orientation of reads using reverse complement alignment.
+1. Correct the orientation of reads using reverse complement alignment.
+2. Detect and remove outliers based on read length and alignment scores.
 3. Output a cleaned FASTQ file with comprehensive quality control applied.
 
-The script dynamically calculates thresholds for alignment-based outliers using percentile-based scoring and for length-based outliers using interquartile range (IQR).
+This script iteratively forms a consensus sequence and The script dynamically calculates thresholds for alignment-based outliers using percentile-based scoring and for length-based outliers using interquartile range (IQR).
 
 ---
 
@@ -14,7 +14,7 @@ The script dynamically calculates thresholds for alignment-based outliers using 
 ### 1. Reverse Complement Correction
 - Aligns each read to the consensus sequence.
 - Corrects the orientation of reads by applying reverse complement if the reverse alignment score is better.
-
+- Iteratively epeats the process until no further reverse complementation is needed (convergence).
 
 ### 2. Outlier Detection
 - **Length-Based Outliers**:
@@ -52,3 +52,28 @@ The script dynamically calculates thresholds for alignment-based outliers using 
 2. Run the script:
    ```bash
    python script_name.py
+
+### Example output
+Processing file: example.fastq
+Parsing FASTQ sequences...
+
+Iteration 1: Generating consensus and aligning sequences...
+Consensus sequence generated (first 50 bases): ACTG...
+Aligning sequences and checking for reverse complements...
+Sequence X reverse complemented.
+...
+
+Detecting length-based outliers...
+Length-based outliers removed: 5
+Length thresholds: lower = 100, upper = 300
+
+Calculating alignment scores and detecting alignment-based outliers...
+Alignment-based outliers removed: 3
+
+Processing complete!
+Total initial sequences: 1000
+Total length-based outliers removed: 5
+Total alignment-based outliers removed: 3
+Total reads remaining after preliminary QC: 992
+Total sequences reverse complemented: 50
+Corrected sequences saved to: Corrected_example-992seqs.fastq
